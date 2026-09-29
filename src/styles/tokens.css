@@ -1,0 +1,83 @@
+/* Agent-J design tokens. Blue is taken from the logo; everything else is derived from it. */
+:root {
+  --blue-50: #eef5ff;
+  --blue-100: #dbe9ff;
+  --blue-200: #b9d5ff;
+  --blue-300: #8ec5ff;
+  --blue-500: #2f7bf5;
+  --blue-600: #1f66dc;
+  --blue-700: #1a52b3;
+  --navy-900: #0e2240;
+
+  --bg: #f4f8fd;
+  --surface: #ffffff;
+  --surface-2: #f7faff;
+  --surface-hover: #eef4fd;
+  --ink: #0e2240;
+  --ink-2: #3b4f6b;
+  --muted: #6b7c95;
+  --border: #e1e9f4;
+  --border-strong: #cfdbeb;
+  --accent: var(--blue-500);
+  --accent-hover: var(--blue-600);
+  --accent-soft: var(--blue-50);
+  --accent-ink: #ffffff;
+  --user-bubble: #e6f0ff;
+  --shadow-sm: 0 1px 2px rgb(14 34 64 / 6%);
+  --shadow-md: 0 6px 24px rgb(14 34 64 / 10%);
+  --overlay: rgb(14 34 64 / 40%);
+
+  /* Life areas */
+  --area-arbeit: #2f7bf5;
+  --area-familie: #e0567a;
+  --area-gesundheit: #16a37f;
+  --area-finanzen: #d99a1e;
+  --area-haushalt: #8a63d2;
+  --area-freizeit: #0ea5c6;
+
+  /* Task status */
+  --st-todo: #7b8ba3;
+  --st-progress: #2f7bf5;
+  --st-blocked: #e08a12;
+  --st-done: #1f9d62;
+
+  --danger: #d64545;
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --tabbar-h: 64px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1424;
+  --surface: #12203a;
+  --surface-2: #0f1b31;
+  --surface-hover: #1a2b4a;
+  --ink: #e8f0fc;
+  --ink-2: #b9c8de;
+  --muted: #8a9bb6;
+  --border: #1f3050;
+  --border-strong: #2a3f64;
+  --accent: #4a8fff;
+  --accent-hover: #6aa3ff;
+  --accent-soft: #16294a;
+  --user-bubble: #1b3159;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 8px 28px rgb(0 0 0 / 45%);
+  --overlay: rgb(3 8 18 / 65%);
+
+  --area-arbeit: #5b9bff;
+  --area-familie: #f07c9b;
+  --area-gesundheit: #35c79e;
+  --area-finanzen: #f0b43c;
+  --area-haushalt: #a988ea;
+  --area-freizeit: #38c3e0;
+
+  --st-todo: #8a9bb6;
+  --st-progress: #5b9bff;
+  --st-blocked: #f0a53a;
+  --st-done: #3cc684;
+  color-scheme: dark;
+}
