@@ -40,7 +40,7 @@ export interface MockApiOptions {
   db?: MockDb;
 }
 
-const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
+const clone = <T>(v: T): T => (v === undefined ? v : (JSON.parse(JSON.stringify(v)) as T));
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -95,24 +95,24 @@ export class MockApi implements AgentJApi {
 
   // Account ------------------------------------------------------------------
 
-  getMe(): Promise<User> {
+  async getMe(): Promise<User> {
     return this.respond(this.db.user);
   }
 
-  getWorkspaces(): Promise<Workspace[]> {
+  async getWorkspaces(): Promise<Workspace[]> {
     return this.respond(this.db.workspaces);
   }
 
   // Chats --------------------------------------------------------------------
 
-  getChats(workspaceId: ID): Promise<Chat[]> {
+  async getChats(workspaceId: ID): Promise<Chat[]> {
     const chats = this.db.chats
       .filter((c) => c.workspaceId === workspaceId)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return this.respond(chats);
   }
 
-  createChat(workspaceId: ID): Promise<Chat> {
+  async createChat(workspaceId: ID): Promise<Chat> {
     this.find(this.db.workspaces, workspaceId, 'Workspace');
     const chat: Chat = {
       id: this.newId('chat'),
@@ -124,7 +124,7 @@ export class MockApi implements AgentJApi {
     return this.respond(chat);
   }
 
-  getMessages(chatId: ID): Promise<Message[]> {
+  async getMessages(chatId: ID): Promise<Message[]> {
     this.find(this.db.chats, chatId, 'Chat');
     return this.respond(this.db.messages.filter((m) => m.chatId === chatId));
   }
@@ -190,7 +190,7 @@ export class MockApi implements AgentJApi {
 
   // Requests -----------------------------------------------------------------
 
-  getRequests(workspaceId: ID): Promise<AgentRequest[]> {
+  async getRequests(workspaceId: ID): Promise<AgentRequest[]> {
     return this.respond(this.db.requests.filter((r) => r.workspaceId === workspaceId));
   }
 
@@ -210,11 +210,11 @@ export class MockApi implements AgentJApi {
 
   // Approvals ----------------------------------------------------------------
 
-  getApproval(approvalId: ID): Promise<Approval> {
+  async getApproval(approvalId: ID): Promise<Approval> {
     return this.respond(this.find(this.db.approvals, approvalId, 'Freigabe'));
   }
 
-  private decide(approvalId: ID, status: 'approved' | 'rejected'): Promise<Approval> {
+  private async decide(approvalId: ID, status: 'approved' | 'rejected'): Promise<Approval> {
     const approval = this.find(this.db.approvals, approvalId, 'Freigabe');
     if (approval.status !== 'pending')
       throw new ApiError('Freigabe ist bereits entschieden', 409, 'already_decided');
@@ -230,15 +230,15 @@ export class MockApi implements AgentJApi {
     return this.respond(approval);
   }
 
-  approve(approvalId: ID): Promise<Approval> {
+  async approve(approvalId: ID): Promise<Approval> {
     return this.decide(approvalId, 'approved');
   }
 
-  reject(approvalId: ID): Promise<Approval> {
+  async reject(approvalId: ID): Promise<Approval> {
     return this.decide(approvalId, 'rejected');
   }
 
-  updateApprovalDraft(approvalId: ID, body: string): Promise<Approval> {
+  async updateApprovalDraft(approvalId: ID, body: string): Promise<Approval> {
     const approval = this.find(this.db.approvals, approvalId, 'Freigabe');
     if (approval.status !== 'pending')
       throw new ApiError('Freigabe ist bereits entschieden', 409, 'already_decided');
@@ -253,7 +253,7 @@ export class MockApi implements AgentJApi {
 
   // Tasks --------------------------------------------------------------------
 
-  getTasks(workspaceId: ID, range: TaskRange): Promise<Task[]> {
+  async getTasks(workspaceId: ID, range: TaskRange): Promise<Task[]> {
     const now = this.now();
     const tasks = this.db.tasks.filter(
       (t) => t.workspaceId === workspaceId && isInRange(t, range, now),
@@ -261,7 +261,7 @@ export class MockApi implements AgentJApi {
     return this.respond(tasks);
   }
 
-  updateTask(taskId: ID, patch: TaskPatch): Promise<Task> {
+  async updateTask(taskId: ID, patch: TaskPatch): Promise<Task> {
     const task = this.find(this.db.tasks, taskId, 'Aufgabe');
     Object.assign(task, patch);
     if (patch.status === 'done') task.completedAt = this.now().toISOString();
@@ -269,13 +269,13 @@ export class MockApi implements AgentJApi {
     return this.respond(task);
   }
 
-  confirmTask(taskId: ID): Promise<Task> {
+  async confirmTask(taskId: ID): Promise<Task> {
     const task = this.find(this.db.tasks, taskId, 'Aufgabe');
     task.isDraft = false;
     return this.respond(task);
   }
 
-  discardTask(taskId: ID): Promise<void> {
+  async discardTask(taskId: ID): Promise<void> {
     this.find(this.db.tasks, taskId, 'Aufgabe');
     this.db.tasks = this.db.tasks.filter((t) => t.id !== taskId);
     return this.respond(undefined);
@@ -283,21 +283,21 @@ export class MockApi implements AgentJApi {
 
   // Flows --------------------------------------------------------------------
 
-  getFlows(): Promise<Flow[]> {
+  async getFlows(): Promise<Flow[]> {
     return this.respond(this.db.flows);
   }
 
-  updateFlow(flowId: ID, patch: FlowPatch): Promise<Flow> {
+  async updateFlow(flowId: ID, patch: FlowPatch): Promise<Flow> {
     const flow = this.find(this.db.flows, flowId, 'Flow');
     Object.assign(flow, patch);
     return this.respond(flow);
   }
 
-  getFlowhub(): Promise<FlowTemplate[]> {
+  async getFlowhub(): Promise<FlowTemplate[]> {
     return this.respond(this.db.templates);
   }
 
-  adoptTemplate(templateId: ID): Promise<Flow> {
+  async adoptTemplate(templateId: ID): Promise<Flow> {
     const template = this.find(this.db.templates, templateId, 'Vorlage');
     if (template.adopted)
       throw new ApiError('Vorlage ist bereits übernommen', 409, 'already_adopted');
@@ -321,20 +321,20 @@ export class MockApi implements AgentJApi {
 
   // Network and profile ------------------------------------------------------
 
-  getContactGraph(): Promise<ContactGraph> {
+  async getContactGraph(): Promise<ContactGraph> {
     return this.respond(this.db.graph);
   }
 
-  getProfile(): Promise<Profile> {
+  async getProfile(): Promise<Profile> {
     return this.respond(this.db.profile);
   }
 
-  confirmFact(factId: ID): Promise<void> {
+  async confirmFact(factId: ID): Promise<void> {
     this.find(this.db.profile.facts, factId, 'Fakt').status = 'confirmed';
     return this.respond(undefined);
   }
 
-  rejectFact(factId: ID): Promise<void> {
+  async rejectFact(factId: ID): Promise<void> {
     this.find(this.db.profile.facts, factId, 'Fakt');
     this.db.profile.facts = this.db.profile.facts.filter((f) => f.id !== factId);
     return this.respond(undefined);
@@ -342,32 +342,32 @@ export class MockApi implements AgentJApi {
 
   // Settings -----------------------------------------------------------------
 
-  getAccounts(): Promise<ConnectedAccount[]> {
+  async getAccounts(): Promise<ConnectedAccount[]> {
     return this.respond(this.db.accounts);
   }
 
-  connectAccount(accountId: ID): Promise<ConnectedAccount> {
+  async connectAccount(accountId: ID): Promise<ConnectedAccount> {
     const account = this.find(this.db.accounts, accountId, 'Account');
     account.connected = true;
     return this.respond(account);
   }
 
-  disconnectAccount(accountId: ID): Promise<ConnectedAccount> {
+  async disconnectAccount(accountId: ID): Promise<ConnectedAccount> {
     const account = this.find(this.db.accounts, accountId, 'Account');
     account.connected = false;
     return this.respond(account);
   }
 
-  getSettings(): Promise<Settings> {
+  async getSettings(): Promise<Settings> {
     return this.respond(this.db.settings);
   }
 
-  updateSettings(patch: SettingsPatch): Promise<Settings> {
+  async updateSettings(patch: SettingsPatch): Promise<Settings> {
     this.db.settings = { ...this.db.settings, ...patch };
     return this.respond(this.db.settings);
   }
 
-  getBilling(): Promise<Billing> {
+  async getBilling(): Promise<Billing> {
     return this.respond(this.db.billing);
   }
 }
