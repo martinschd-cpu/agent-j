@@ -1,9 +1,11 @@
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { Dimensions } from 'react-native';
 import { create } from 'zustand';
 
 import type { AgentJApi, Chat, ID, Message } from '@/api';
 import { useApi, useUndoController } from './api-context';
+import { layout } from '@/theme/tokens';
 import { keys } from './queries';
 import { useUi } from './ui';
 
@@ -96,7 +98,9 @@ export async function runChatStream(
           const card = ev.message.parts.find((p) => p.type === 'card');
           const ui = useUi.getState();
           const isActive = ui.activeChatId === chatId || ui.activeChatId === null;
-          if (card && isActive) ui.setPanel({ type: card.card, refId: card.refId });
+          // On phones the panel is a full screen sheet; there the card opens it on tap.
+          const roomy = Dimensions.get('window').width >= layout.sidebarBreakpoint;
+          if (card && isActive && roomy) ui.setPanel({ type: card.card, refId: card.refId });
           break;
         }
         case 'error':
