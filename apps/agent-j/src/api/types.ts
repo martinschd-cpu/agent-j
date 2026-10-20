@@ -243,6 +243,12 @@ export interface FlowTemplate {
 
 export type ContactGroup = 'Familie' | 'Arbeit' | 'Freunde' | 'Dienstleister';
 
+/** Optional layout hint for the graph, both values from 0 to 1. */
+export interface GraphPoint {
+  x: number;
+  y: number;
+}
+
 export interface Contact {
   id: ID;
   name: string;
@@ -252,6 +258,7 @@ export interface Contact {
   openItem?: string;
   note?: string;
   source: string;
+  layout?: GraphPoint;
 }
 
 export interface Relation {
@@ -261,7 +268,7 @@ export interface Relation {
 
 export interface ContactGraph {
   /** The user in the center of the graph. */
-  me: { id: ID; name: string; initials: string };
+  me: { id: ID; name: string; initials: string; layout?: GraphPoint };
   contacts: Contact[];
   relations: Relation[];
 }

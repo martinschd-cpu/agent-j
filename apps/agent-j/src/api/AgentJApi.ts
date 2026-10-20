@@ -40,7 +40,11 @@ export interface AgentJApi {
    * Sends a user message and streams the agent's work steps and answer.
    * The user message is persisted before the first event is emitted.
    */
-  sendMessage(chatId: ID, text: string, options?: SendMessageOptions): AsyncIterable<ChatStreamEvent>;
+  sendMessage(
+    chatId: ID,
+    text: string,
+    options?: SendMessageOptions,
+  ): AsyncIterable<ChatStreamEvent>;
 
   // Requests
   getRequests(workspaceId: ID): Promise<AgentRequest[]>;
