@@ -1,0 +1,7 @@
+node_modules
+.expo
+dist
+package-lock.json
+
+# Reference material, kept verbatim
+docs/

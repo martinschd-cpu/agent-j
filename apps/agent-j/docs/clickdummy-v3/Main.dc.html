@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Agent-J · Chat</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#0E1B2C;background:#FFFFFF}
+a{color:#2563A8}a:hover{color:#1B4B82}
+button,input,textarea{font-family:inherit}
+.side:hover{background:#E9EEF5}
+.hov:hover{background:#F2F5F9}
+.card:hover{border-color:#9FB9D8;background:#FAFCFE}
+.node{transition:transform .15s}.node:hover{transform:scale(1.2)}
+textarea:focus{outline:2px solid #9FC3EA;outline-offset:1px}
+.scroll::-webkit-scrollbar{width:8px}.scroll::-webkit-scrollbar-thumb{background:#D3DCE7;border-radius:4px}
+@keyframes vb{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.bar{display:block;width:4px;height:26px;border-radius:2px;background:#2563A8;animation:vb 1.1s ease-in-out infinite}
+.bar:nth-child(2){animation-delay:.15s}.bar:nth-child(3){animation-delay:.3s}.bar:nth-child(4){animation-delay:.45s}.bar:nth-child(5){animation-delay:.6s}.bar:nth-child(6){animation-delay:.75s}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2563A8;animation:pulse 1s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+</style>
+</helmet>
+<div style="width: 100%; height: 100vh; display: flex; background: #FFFFFF; overflow: hidden">
+
+<aside style="width: 264px; flex-shrink: 0; background: #F4F6F9; border-right: 1px solid #E3E8EF; display: flex; flex-direction: column; box-sizing: border-box; min-height: 0">
+<div style="padding: 16px 14px 10px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 4px"><img src="/_blob/d2ed2aaf46d6005e14cf2946e2ae7eb7" alt="Agent-J Logo" style="width: 34px; height: 34px; border-radius: 50%"><span style="font-family: Sora, sans-serif; font-size: 18px; font-weight: 700; color: #0F2340">Agent-J</span></div>
+<button onClick="{{newChat}}" class="hov" style="height: 44px; border: 1px solid #D8E0EA; border-radius: 10px; background: #FFFFFF; color: #0F2340; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 0 12px; cursor: pointer"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Neuer Chat</button>
+<nav aria-label="Hauptnavigation" style="display: flex; flex-direction: column; gap: 2px">
+<button class="side" onClick="{{showChats}}" aria-current="{{chatsCurrent}}" style="height: 44px; border: 0; border-radius: 9px; background: {{navChatsBg}}; color: #0E1B2C; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; padding: 0 10px; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"></path></svg>Chats</button>
+<button class="side" onClick="{{showOpen}}" aria-current="{{openCurrent}}" style="height: 44px; border: 0; border-radius: 9px; background: {{navOpenBg}}; color: #0E1B2C; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; padding: 0 10px; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h5l1.5 3h5L16 13h5"></path><path d="M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"></path></svg><span style="flex-grow: 1">Requests</span><sc-if value="{{hasOpen}}" hint-placeholder-val="{{true}}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #2563A8; color: #FFFFFF; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{openCount}}</span></sc-if></button>
+<button class="side" onClick="{{showFlows}}" aria-current="{{flowsCurrent}}" style="height: 44px; border: 0; border-radius: 9px; background: {{navFlowsBg}}; color: #0E1B2C; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; padding: 0 10px; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="2"></circle><circle cx="19" cy="19" r="2"></circle><path d="M7 5h8a3.5 3.5 0 0 1 0 7H9a3.5 3.5 0 0 0 0 7h8"></path></svg><span style="flex-grow: 1">Flows</span><span style="font-size: 12px; color: #5A6B80">{{activeFlows}} aktiv</span></button>
+</nav>
+</div>
+
+<div class="scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 4px 10px 12px">
+<sc-if value="{{isChats}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 12px; font-weight: 600; color: #5A6B80; padding: 6px 10px">{{g.label}}</span>
+<sc-for list="{{g.items}}" as="c" hint-placeholder-count="3">
+<button class="side" onClick="{{c.pick}}" style="height: 40px; border: 0; border-radius: 8px; background: {{c.bg}}; color: #1C2B3D; font-size: 13.5px; font-weight: {{c.fw}}; padding: 0 10px; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.title}}</button>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isOpen}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px">
+<span style="font-size: 12.5px; color: #5A6B80; padding: 2px 6px 4px; line-height: 1.45">Was Agent-J mit dir klären will. Antworte direkt hier.</span>
+<sc-for list="{{openItems}}" as="o" hint-placeholder-count="3">
+<div style="border: 1px solid #E0E6EE; border-radius: 10px; background: #FFFFFF; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: {{o.color}}">{{o.kind}}</span>
+<span style="font-size: 13.5px; line-height: 1.4; color: #0E1B2C">{{o.text}}</span>
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{o.btns}}" as="b" hint-placeholder-count="2"><button onClick="{{b.run}}" style="min-height: 34px; padding: 0 10px; border-radius: 8px; border: {{b.border}}; background: {{b.bg}}; color: {{b.fg}}; font-size: 12.5px; font-weight: 600; cursor: pointer">{{b.label}}</button></sc-for>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{noOpen}}" hint-placeholder-val="{{false}}"><span style="font-size: 13.5px; color: #5A6B80; padding: 8px 6px">Alles geklärt. Nichts offen.</span></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{isFlows}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 1px; padding-top: 4px">
+<span style="font-size: 12px; font-weight: 600; color: #5A6B80; padding: 6px 10px">Meine Flows</span>
+<sc-for list="{{flows}}" as="f" hint-placeholder-count="4">
+<button class="side" onClick="{{f.pick}}" style="min-height: 44px; border: 0; border-radius: 8px; background: {{f.sideBg}}; padding: 6px 10px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: {{f.dot}}; flex-shrink: 0"></span>
+<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 13.5px; font-weight: 500; color: #1C2B3D">{{f.name}}</span><span style="font-size: 12px; color: #5A6B80; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.trigger}}</span></span>
+</button>
+</sc-for>
+<span style="font-size: 12.5px; color: #5A6B80; padding: 10px 10px 0; line-height: 1.45">Neue Flows beschreibst du einfach im Chat.</span>
+</div>
+</sc-if>
+</div>
+
+<div style="padding: 12px 14px 14px; border-top: 1px solid #E3E8EF; display: flex; flex-direction: column; gap: 10px">
+<div role="group" aria-label="Workspace" style="display: flex; padding: 3px; border-radius: 9px; background: #E6EBF2">
+<sc-for list="{{wsBtns}}" as="w" hint-placeholder-count="2">
+<button onClick="{{w.pick}}" aria-pressed="{{w.on}}" style="flex-grow: 1; height: 34px; border: 0; border-radius: 7px; background: {{w.bg}}; color: {{w.fg}}; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: {{w.shadow}}">{{w.label}}</button>
+</sc-for>
+</div>
+<div style="position: relative">
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 0; right: 0; bottom: 50px; background: #FFFFFF; border: 1px solid #E0E6EE; border-radius: 12px; box-shadow: 0 10px 30px rgba(15,35,64,.14); padding: 6px; display: flex; flex-direction: column; gap: 1px; z-index: 5">
+<span style="font-size: 12px; color: #5A6B80; padding: 8px 10px 6px">[E-MAIL-ADRESSE]</span>
+<sc-for list="{{menuItems}}" as="mi" hint-placeholder-count="5">
+<a href="Einstellungen.dc.html" class="hov" style="height: 40px; border-radius: 8px; padding: 0 10px; display: flex; align-items: center; font-size: 14px; color: #0E1B2C; text-decoration: none">{{mi}}</a>
+</sc-for>
+<div style="height: 1px; background: #EEF1F5; margin: 4px 6px"></div>
+<button class="hov" style="height: 40px; border: 0; border-radius: 8px; padding: 0 10px; background: transparent; text-align: left; font-size: 14px; color: #B42318; cursor: pointer">Abmelden</button>
+</div>
+</sc-if>
+<button class="side" onClick="{{toggleMenu}}" aria-expanded="{{menuOpen}}" style="width: 100%; height: 46px; border: 0; border-radius: 10px; background: {{menuBg}}; display: flex; align-items: center; gap: 10px; padding: 0 6px; cursor: pointer; text-align: left"><span style="width: 32px; height: 32px; border-radius: 50%; background: #2563A8; color: #FFFFFF; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0">MS</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 500; color: #0E1B2C">Martin</span><span style="font-size: 12px; color: #5A6B80">Einstellungen</span></span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6B80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15l5-5 5 5"></path></svg></button>
+</div>
+</div>
+</aside>
+
+<main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; position: relative">
+<header style="height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 20px; border-bottom: 1px solid #EEF1F5">
+<h1 style="margin: 0; font-size: 15px; font-weight: 600; color: #0E1B2C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{activeTitle}}</h1>
+<button class="hov" onClick="{{togglePanel}}" aria-label="Seitenfenster ein- oder ausblenden" aria-pressed="{{panelOpen}}" style="width: 44px; height: 44px; border-radius: 9px; border: 0; background: {{panelBtnBg}}; color: #33445A; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M15 4v16"></path></svg></button>
+</header>
+
+<div class="scroll" ref="{{scrollRef}}" style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 32px 24px 16px">
+<div style="max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px">
+<sc-for list="{{messages}}" as="m" hint-placeholder-count="4">
+<div>
+<sc-if value="{{m.isUser}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; justify-content: flex-end"><div style="max-width: 82%; background: #EEF2F7; color: #0E1B2C; padding: 11px 15px; border-radius: 16px; font-size: 15px; line-height: 1.55; white-space: pre-line">{{m.text}}</div></div>
+</sc-if>
+<sc-if value="{{m.isAgent}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; gap: 14px; align-items: flex-start">
+<img src="/_blob/d2ed2aaf46d6005e14cf2946e2ae7eb7" alt="" style="width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; margin-top: 2px">
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 15px; line-height: 1.65; color: #0E1B2C; white-space: pre-line">{{m.text}}</div>
+
+<sc-if value="{{m.hasBrief}}" hint-placeholder-val="{{false}}">
+<div style="max-width: 540px; border: 1px solid #D3DCE7; border-radius: 14px; overflow: hidden">
+<div style="padding: 14px 16px; background: #0F2340; color: #FFFFFF; display: flex; flex-direction: column; gap: 2px"><span style="font-family: Sora, sans-serif; font-size: 16px; font-weight: 600">{{m.brief.title}}</span><span style="font-size: 12.5px; color: #B9C8DB">{{m.brief.sub}}</span></div>
+<sc-for list="{{m.brief.rows}}" as="r" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; padding: 11px 16px; border-top: 1px solid #EEF1F5; font-size: 14px"><span style="color: #5A6B80">{{r.label}}</span><span style="line-height: 1.45">{{r.value}}</span></div>
+</sc-for>
+<sc-if value="{{m.ctaOpen}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid #EEF1F5; background: #F4F8FD"><span style="flex-grow: 1; font-size: 14px; line-height: 1.45"><strong style="font-weight: 600">Erster Schritt:</strong> {{m.brief.cta}}</span><button onClick="{{m.doCta}}" style="height: 40px; padding: 0 16px; border-radius: 9px; border: 0; background: #2563A8; color: #FFFFFF; font-size: 13.5px; font-weight: 600; cursor: pointer; flex-shrink: 0">Erledigen</button></div>
+</sc-if>
+<sc-if value="{{m.ctaDone}}" hint-placeholder-val="{{false}}">
+<div style="padding: 12px 16px; border-top: 1px solid #EEF1F5; background: #E7F5EC; color: #14532D; font-size: 14px; font-weight: 600">Erledigt. Guter Start in den Tag!</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{m.hasCard}}" hint-placeholder-val="{{false}}">
+<button class="card" onClick="{{m.open}}" style="display: flex; align-items: center; gap: 14px; width: 100%; max-width: 440px; padding: 12px 14px; border-radius: 12px; border: 1px solid {{m.cardBorder}}; background: #FFFFFF; text-align: left; cursor: pointer">
+<span style="width: 38px; height: 38px; border-radius: 9px; background: #EEF3F9; color: #2563A8; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+<sc-if value="{{m.cTasks}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"></path><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"></path></svg></sc-if>
+<sc-if value="{{m.cFlows}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="2"></circle><circle cx="19" cy="19" r="2"></circle><path d="M7 5h8a3.5 3.5 0 0 1 0 7H9a3.5 3.5 0 0 0 0 7h8"></path></svg></sc-if>
+<sc-if value="{{m.cNetwork}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="7" r="2.5"></circle><circle cx="12" cy="18" r="2.5"></circle><path d="M8.5 6.2l7-.4M7.2 8.2l3.8 7.6M16.9 9.2l-3.8 6.6"></path></svg></sc-if>
+<sc-if value="{{m.cProfile}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></sc-if>
+</span>
+<span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600; color: #0E1B2C">{{m.card.title}}</span><span style="font-size: 12.5px; color: #5A6B80">{{m.card.sub}}</span></span>
+<span style="font-size: 13px; font-weight: 600; color: #2563A8">{{m.cardCta}}</span>
+</button>
+</sc-if>
+
+<sc-if value="{{m.hasAppr}}" hint-placeholder-val="{{false}}">
+<div style="max-width: 520px; border: 1px solid {{m.apprBorder}}; border-radius: 12px; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: {{m.apprHeadBg}}; color: {{m.apprHeadFg}}; font-size: 13px; font-weight: 600"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"></path></svg><span style="flex-grow: 1">{{m.apprHead}}</span><span style="font-weight: 500">{{m.appr.system}}</span></div>
+<div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13.5px; color: #5A6B80">An <strong style="color: #0E1B2C; font-weight: 600">{{m.appr.to}}</strong></span>
+<sc-if value="{{m.notEditing}}" hint-placeholder-val="{{true}}"><span style="font-size: 14px; line-height: 1.55; color: #33445A; white-space: pre-line">{{m.apprText}}</span></sc-if>
+<sc-if value="{{m.editing}}" hint-placeholder-val="{{false}}"><textarea value="{{m.apprText}}" onChange="{{m.onEdit}}" rows="5" aria-label="Entwurf bearbeiten" style="border: 1px solid #C9D6E6; border-radius: 8px; padding: 10px; font-size: 14px; line-height: 1.55; color: #0E1B2C; resize: vertical"></textarea></sc-if>
+</div>
+<sc-if value="{{m.aPending}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding: 0 14px 12px">
+<button class="hov" onClick="{{m.reject}}" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #D8E0EA; background: #FFFFFF; color: #33445A; font-size: 13.5px; font-weight: 600; cursor: pointer">Ablehnen</button>
+<button class="hov" onClick="{{m.toggleEdit}}" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #D8E0EA; background: #FFFFFF; color: #0F2340; font-size: 13.5px; font-weight: 600; cursor: pointer">{{m.editLabel}}</button>
+<button onClick="{{m.approve}}" style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #2563A8; color: #FFFFFF; font-size: 13.5px; font-weight: 600; cursor: pointer">Freigeben</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+
+<sc-if value="{{isWorking}}" hint-placeholder-val="{{false}}">
+<div role="status" aria-live="polite" style="display: flex; gap: 14px; align-items: flex-start">
+<img src="/_blob/d2ed2aaf46d6005e14cf2946e2ae7eb7" alt="" style="width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 4px">
+<sc-for list="{{workSteps}}" as="w" hint-placeholder-count="2">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #33445A">
+<sc-if value="{{w.done}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+<sc-if value="{{w.busy}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="display: inline-flex; gap: 3px; width: 14px"><span class="dot"></span><span class="dot"></span></span></sc-if>
+{{w.text}}</span>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div role="status" aria-live="polite" style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 128px; background: #0F2340; color: #FFFFFF; border-radius: 12px; padding: 6px 6px 6px 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(15,35,64,.25); z-index: 10; white-space: nowrap">
+<span style="font-size: 14px">{{toastText}}</span>
+<button onClick="{{undo}}" style="height: 36px; padding: 0 12px; border-radius: 8px; border: 0; background: #1F3D66; color: #9CD2F5; font-size: 13.5px; font-weight: 600; cursor: pointer">Rückgängig</button>
+</div>
+</sc-if>
+
+<div style="flex-shrink: 0; padding: 0 24px 18px">
+<div style="max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px">
+<div style="border: 1px solid #D3DCE7; border-radius: 16px; background: #FFFFFF; box-shadow: 0 4px 18px rgba(15,35,64,.06); padding: 12px 10px 10px 16px; display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{notVoice}}" hint-placeholder-val="{{true}}">
+<textarea value="{{draft}}" onChange="{{onDraft}}" onKeyDown="{{onKey}}" rows="2" placeholder="Schreib oder sprich mit Agent-J" aria-label="Nachricht an Agent-J" style="border: 0; outline: none; resize: none; font-size: 15px; line-height: 1.5; color: #0E1B2C; background: transparent"></textarea>
+</sc-if>
+<sc-if value="{{isVoice}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; gap: 14px; min-height: 45px">
+<div aria-hidden="true" style="display: flex; align-items: center; gap: 4px; height: 30px"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+<span style="font-size: 15px; color: #33445A">„{{voiceText}}“</span>
+</div>
+</sc-if>
+<div style="display: flex; align-items: center; gap: 6px">
+<button class="hov" aria-label="Datei anhängen" style="width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; color: #5A6B80; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></button>
+<span style="font-size: 12.5px; color: #5A6B80">{{wsLabel}}</span>
+<div style="flex-grow: 1"></div>
+<button onClick="{{voiceToggle}}" disabled="{{working}}" style="height: 40px; padding: 0 12px; border-radius: 20px; border: 0; background: {{voiceBg}}; color: {{voiceFg}}; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; opacity: {{sendOpacity}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg>{{voiceLabel}}</button>
+<button onClick="{{send}}" disabled="{{working}}" aria-label="Senden" style="width: 40px; height: 40px; border-radius: 50%; border: 0; background: #2563A8; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{sendOpacity}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+</div>
+</div>
+<span style="font-size: 12px; color: #5A6B80; text-align: center">Agent-J kann Fehler machen. Nach außen handelt er nur mit deiner Freigabe.</span>
+</div>
+</div>
+</main>
+
+<sc-if value="{{panelOpen}}" hint-placeholder-val="{{true}}">
+<section aria-label="Seitenfenster" style="width: 460px; flex-shrink: 0; border-left: 1px solid #E3E8EF; background: #FFFFFF; display: flex; flex-direction: column; min-height: 0">
+<div style="height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 20px; border-bottom: 1px solid #EEF1F5">
+<sc-if value="{{pBack}}" hint-placeholder-val="{{false}}"><button class="hov" onClick="{{flowBack}}" aria-label="Zurück zu allen Flows" style="width: 40px; height: 40px; border-radius: 8px; border: 0; background: transparent; color: #33445A; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></button></sc-if>
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">{{pTitle}}</h2><span style="font-size: 12px; color: #5A6B80">{{pSub}}</span></div>
+<button class="hov" onClick="{{closePanel}}" aria-label="Seitenfenster schließen" style="width: 44px; height: 44px; border-radius: 8px; border: 0; background: transparent; color: #33445A; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 18px 20px 24px">
+
+<sc-if value="{{pTasks}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: {{todayBg}}">
+<div style="display: flex; justify-content: space-between; font-size: 13.5px"><span style="font-weight: 600">Heute geschafft</span><span style="color: #33445A">{{todayDone}} von {{todayTotal}}</span></div>
+<div style="height: 8px; border-radius: 4px; background: #DCE5EF"><div style="height: 8px; border-radius: 4px; background: #15803D; width: {{todayPct}}"></div></div>
+<span style="font-size: 13px; color: #33445A">{{todayMsg}}</span>
+</div>
+<div role="group" aria-label="Zeitraum" style="display: flex; padding: 3px; border-radius: 9px; background: #EEF2F7">
+<sc-for list="{{taskFilters}}" as="f" hint-placeholder-count="3"><button onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="flex-grow: 1; height: 36px; border: 0; border-radius: 7px; background: {{f.bg}}; color: {{f.fg}}; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: {{f.shadow}}">{{f.label}}</button></sc-for>
+</div>
+<sc-if value="{{hasNew}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12.5px; font-weight: 600; color: #2563A8">Neu erkannt · bitte bestätigen</span>
+<sc-for list="{{newTasks}}" as="t" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border: 1px dashed #A9CBEA; border-radius: 10px; background: #F7FAFE">
+<span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 500">{{t.title}}</span><span style="font-size: 12px; color: #5A6B80">erkannt aus {{t.source}}</span></span>
+<button onClick="{{t.accept}}" aria-label="Übernehmen" style="width: 40px; height: 40px; border-radius: 8px; border: 0; background: #2563A8; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></button>
+<button class="hov" onClick="{{t.discard}}" aria-label="Verwerfen" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #D8E0EA; background: #FFFFFF; color: #5A6B80; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-for list="{{taskGroups}}" as="g" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: #33445A; padding-bottom: 4px"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{g.color}}"></span>{{g.label}} <span style="font-weight: 400; color: #5A6B80">{{g.count}}</span></span>
+<sc-for list="{{g.items}}" as="t" hint-placeholder-count="3">
+<button class="hov" onClick="{{t.toggle}}" role="checkbox" aria-checked="{{t.checked}}" style="min-height: 44px; display: flex; align-items: flex-start; gap: 12px; padding: 9px 8px; border: 0; border-radius: 8px; background: transparent; text-align: left; cursor: pointer">
+<span style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid {{t.ring}}; background: {{t.fill}}; box-sizing: border-box; flex-shrink: 0; margin-top: 1px; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{t.mark}}</span>
+<span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 14px; color: {{t.titleColor}}; text-decoration: {{t.strike}}">{{t.title}}</span><span style="font-size: 12px; color: {{t.metaColor}}">{{t.meta}}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-for>
+<span style="font-size: 12.5px; color: #5A6B80">Tipp: Sag einfach „verschieb das auf Donnerstag“.</span>
+</div>
+</sc-if>
+
+<sc-if value="{{pFlowList}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{flows}}" as="f" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px solid #F0F3F7">
+<button class="hov" onClick="{{f.pick}}" style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 10px 8px; border: 0; border-radius: 8px; background: transparent; text-align: left; cursor: pointer"><span style="font-size: 14.5px; font-weight: 600; color: #0E1B2C">{{f.name}}</span><span style="font-size: 12.5px; color: #5A6B80">{{f.trigger}}</span></button>
+<button onClick="{{f.toggle}}" role="switch" aria-checked="{{f.checked}}" aria-label="{{f.name}} aktiv" style="width: 44px; height: 26px; border-radius: 13px; border: 0; background: {{f.track}}; position: relative; cursor: pointer; padding: 0; flex-shrink: 0"><span style="position: absolute; top: 3px; left: {{f.knob}}; width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,.2)"></span></button>
+</div>
+</sc-for>
+</div>
+<div style="padding: 14px; border-radius: 12px; background: #F4F7FB; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; font-weight: 600">Neuen Flow anlegen</span><span style="font-size: 13px; line-height: 1.5; color: #33445A">Beschreib im Chat einfach, was regelmäßig passieren soll. Zum Beispiel: „Jeden Freitag um 16 Uhr fass mir die Woche zusammen.“</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12.5px; font-weight: 600; color: #33445A">Vorlagen aus dem Flowhub</span>
+<sc-for list="{{hub}}" as="h" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border: 1px solid #E3E8EF; border-radius: 10px">
+<span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 500">{{h.name}}</span><span style="font-size: 12px; color: #5A6B80">{{h.sub}}</span></span>
+<button onClick="{{h.adopt}}" style="height: 40px; padding: 0 12px; border-radius: 8px; border: {{h.border}}; background: {{h.bg}}; color: {{h.fg}}; font-size: 12.5px; font-weight: 600; cursor: pointer">{{h.label}}</button>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{pFlowDetail}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px"><span style="font-family: Sora, sans-serif; font-size: 19px; font-weight: 600">{{fd.name}}</span><span style="font-size: 12.5px; color: #5A6B80">{{fd.kind}} · {{fd.trigger}}</span></div>
+<button onClick="{{fd.toggle}}" role="switch" aria-checked="{{fd.checked}}" aria-label="{{fd.name}} aktiv" style="width: 44px; height: 26px; border-radius: 13px; border: 0; background: {{fd.track}}; position: relative; cursor: pointer; padding: 0; flex-shrink: 0"><span style="position: absolute; top: 3px; left: {{fd.knob}}; width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,.2)"></span></button>
+</div>
+<div style="padding: 14px 16px; border-radius: 12px; background: #F4F7FB; font-size: 15px; line-height: 1.6">„{{fd.text}}“</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12.5px; font-weight: 600; color: #33445A">So läuft der Flow ab</span>
+<sc-for list="{{fd.steps}}" as="st" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 12px"><span style="width: 26px; height: 26px; border-radius: 7px; background: #EEF3F9; color: #2563A8; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0">{{st.n}}</span><span style="flex-grow: 1; font-size: 14px">{{st.label}}</span><span style="font-size: 12px; color: #5A6B80">{{st.sys}}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; border: 1px solid #EEF1F5; border-radius: 12px; font-size: 13.5px">
+<div style="display: flex; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid #EEF1F5"><span style="color: #5A6B80">Schreibt nach außen</span><span style="font-weight: 500">{{fd.writes}}</span></div>
+<div style="display: flex; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid #EEF1F5"><span style="color: #5A6B80">Kosten pro Ausführung</span><span style="font-weight: 500">ca. [KOSTEN]</span></div>
+<div style="display: flex; justify-content: space-between; padding: 11px 14px"><span style="color: #5A6B80">Zuletzt</span><span style="font-weight: 500">{{fd.last}}</span></div>
+</div>
+<span style="font-size: 12.5px; color: #5A6B80; line-height: 1.5">Ändern geht im Chat, zum Beispiel: „Schick mir das Briefing erst um 07:30.“</span>
+</div>
+</sc-if>
+
+<sc-if value="{{pNetwork}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="position: relative; width: 420px; height: 290px; max-width: 100%; border-radius: 14px; overflow: hidden; background: #F4F6F9; border: 1px solid #E3E8EF">
+<sc-for list="{{edges}}" as="e" hint-placeholder-count="20"><div style="position: absolute; left: {{e.left}}; top: {{e.top}}; width: {{e.width}}; height: {{e.h}}; background: {{e.color}}; transform-origin: 0 50%; transform: {{e.rot}}"></div></sc-for>
+<sc-for list="{{nodes}}" as="n" hint-placeholder-count="13">
+<button class="node" onClick="{{n.pick}}" aria-label="{{n.name}}" aria-pressed="{{n.on}}" style="position: absolute; left: {{n.left}}; top: {{n.top}}; width: {{n.size}}; height: {{n.size}}; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: {{n.color}}; box-shadow: {{n.glow}}; opacity: {{n.opacity}}"></button>
+<span style="position: absolute; left: {{n.labelLeft}}; top: {{n.labelTop}}; width: 100px; text-align: center; font-size: 11px; color: {{n.labelColor}}; font-weight: {{n.fw}}; pointer-events: none; white-space: nowrap">{{n.name}}</span>
+</sc-for>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap">
+<sc-for list="{{legend}}" as="l" hint-placeholder-count="4"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #33445A"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{l.color}}"></span>{{l.label}}</span></sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px; border-top: 1px solid #EEF1F5">
+<div style="display: flex; align-items: center; gap: 12px; padding-top: 14px"><span style="width: 44px; height: 44px; border-radius: 50%; background: {{person.color}}; color: #FFFFFF; font-family: Sora, sans-serif; font-weight: 700; display: flex; align-items: center; justify-content: center">{{person.initial}}</span><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: Sora, sans-serif; font-size: 17px; font-weight: 600">{{person.name}}</span><span style="font-size: 13px; color: #5A6B80">{{person.role}}</span></div></div>
+<div style="display: flex; flex-direction: column; border: 1px solid #EEF1F5; border-radius: 12px; font-size: 13.5px">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid #EEF1F5"><span style="color: #5A6B80">Letzter Kontakt</span><span style="font-weight: 500; text-align: right">{{person.last}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid #EEF1F5"><span style="color: #5A6B80">Offen</span><span style="font-weight: 500; text-align: right">{{person.task}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px"><span style="color: #5A6B80">Quelle</span><span style="font-weight: 500; text-align: right">{{person.src}}</span></div>
+</div>
+<span style="font-size: 14px; line-height: 1.55; color: #33445A">{{person.note}}</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{pProfile}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 22px">
+<sc-if value="{{hasLearned}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12.5px; font-weight: 600; color: #2563A8">Neu gelernt · bitte bestätigen</span>
+<sc-for list="{{learned}}" as="l" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border: 1px dashed #A9CBEA; border-radius: 10px; background: #F7FAFE">
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13.5px; line-height: 1.45">{{l.text}}</span><span style="font-size: 12px; color: #5A6B80">{{l.src}}</span></span>
+<button onClick="{{l.ok}}" aria-label="Bestätigen" style="width: 40px; height: 40px; border-radius: 8px; border: 0; background: #2563A8; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></button>
+<button class="hov" onClick="{{l.no}}" aria-label="Verwerfen" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #D8E0EA; background: #FFFFFF; color: #5A6B80; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12.5px; font-weight: 600; color: #33445A; padding-bottom: 4px">Wer ich bin</span>
+<sc-for list="{{facts}}" as="f" hint-placeholder-count="5">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #F0F3F7">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px">{{f.value}}</span><span style="font-size: 12px; color: #5A6B80">{{f.label}} · {{f.src}}</span></div>
+<span style="align-self: center; font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 10px; background: {{f.bg}}; color: {{f.fg}}; white-space: nowrap">{{f.kind}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12.5px; font-weight: 600; color: #33445A">Rollen</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{roles}}" as="r" hint-placeholder-count="4"><span style="font-size: 13px; padding: 5px 11px; border-radius: 14px; background: {{r.bg}}">{{r.label}}</span></sc-for></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12.5px; font-weight: 600; color: #33445A">So möchte ich behandelt werden</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{prefs}}" as="p" hint-placeholder-count="5"><span style="font-size: 13px; padding: 5px 11px; border-radius: 14px; background: #EEF3F9; color: #1B4B82">{{p}}</span></sc-for></div>
+</div>
+<span style="font-size: 12.5px; color: #5A6B80; line-height: 1.5">„Bestätigt“ hast du selbst gesagt oder bestätigt. „Abgeleitet“ hat Agent-J erschlossen. Alles kannst du im Chat ändern oder löschen lassen.</span>
+</div>
+</sc-if>
+</div>
+</section>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startChat":{"editor":"enum","options":["Guten Morgen","Wochenplanung","Morgenbriefing einrichten","Geburtstag Mama","Über mich"],"default":"Guten Morgen"},"$preview":{"width":1440,"height":900}}'>
+var START = { 'Guten Morgen': 'c0', 'Wochenplanung': 'c1', 'Morgenbriefing einrichten': 'c2', 'Geburtstag Mama': 'c3', 'Über mich': 'c4' };
+var WS = { privat: 'Privat', arbeit: 'Arbeit' };
+
+var CHATS = [
+  { id: 'c0', ws: 'privat', group: 'Heute', title: 'Guten Morgen, Martin', panel: { type: 'tasks' }, messages: [
+    { role: 'agent', text: 'Guten Morgen, Martin. Hier ist dein Dienstag.', brief: { title: 'Morgenbriefing · Di, 20.10.', sub: 'aus Kalender, Aufgaben und Gmail', rows: [ ['Termine heute', '14:30 Call mit Dr. Hofmann, 18:00 Laufen'], ['Fällig heute', 'Zahnarzttermin bestätigen, Einkauf Wochenmarkt'], ['Wartet auf dich', '1 Freigabe und 2 Fragen unter „Requests“'] ], cta: 'Zahnarzttermin bestätigen, dauert 2 Minuten', ctaTask: 't2' } } ] },
+  { id: 'c1', ws: 'privat', group: 'Gestern', title: 'Wochenplanung KW 43', panel: { type: 'tasks' }, messages: [
+    { role: 'user', text: 'Was steht diese Woche an? Donnerstag ist das Onboarding, Freitag der Elternabend.' },
+    { role: 'agent', text: 'Diese Woche hast du vier feste Termine und neun offene Aufgaben. Mein Vorschlag:\n\nMo: Steuerunterlagen sortieren\nDi: Zahnarzt bestätigen und Krimi-Dinner buchen\nMi: Zahnarzt um 08:30\nDo: Onboarding, sonst nichts\nFr: Elternabend, vorher Fragen notieren', card: { type: 'tasks', title: 'Aufgaben diese Woche', sub: '9 offen · 2 neu erkannt' } },
+    { role: 'user', text: 'Schick Herrn Adler eine kurze Mail, dass ich die Nebenkostenabrechnung bis Ende Oktober brauche.' },
+    { role: 'agent', text: 'Hier ist der Entwurf. Ich sende erst, wenn du freigibst.', appr: { system: 'Gmail', to: 'Herr Adler', body: 'Guten Tag Herr Adler,\nkönnten Sie mir die Nebenkostenabrechnung für 2025 bis Ende Oktober zukommen lassen?\nViele Grüße, Martin' } } ] },
+  { id: 'c5', ws: 'privat', group: 'Gestern', title: 'Tagesabschluss Montag', messages: [
+    { role: 'agent', text: 'Starker Tag, Martin. Hier ist dein Abschluss.', brief: { title: 'Tagesabschluss · Mo, 19.10.', sub: 'Bilanz und Ausblick', rows: [ ['Erledigt', '5 von 6 Aufgaben'], ['Verschoben', 'Winterreifen-Termin auf Donnerstag'], ['Morgen', '14:30 Call mit Dr. Hofmann, Zahnarzt bestätigen'] ] } } ] },
+  { id: 'c2', ws: 'privat', group: 'Gestern', title: 'Morgenbriefing einrichten', panel: { type: 'flows', sel: 'f1' }, messages: [
+    { role: 'user', text: 'Ich will jeden Morgen wissen, was ansteht.' },
+    { role: 'agent', text: 'Dafür gibt es den Flow Morgenbriefing. Ich habe ihn so eingerichtet: jeden Werktag um 07:00 deine Termine, fälligen Aufgaben und wichtigen E-Mails, höchstens zehn Zeilen, als Push-Nachricht.', card: { type: 'flows', sel: 'f1', title: 'Flow: Morgenbriefing', sub: 'werktags 07:00 · aktiv' } } ] },
+  { id: 'c3', ws: 'privat', group: 'Letzte Woche', title: 'Geburtstag Mama', panel: { type: 'network', sel: 'mama' }, messages: [
+    { role: 'user', text: 'Mama hat am 30. Oktober Geburtstag. Was schenken wir?' },
+    { role: 'agent', text: 'Sie gärtnert gerne und liest Krimis. Drei Ideen:\n\n1. Hochbeet-Set für den Balkon\n2. Krimi-Dinner für zwei\n3. Gutschein für ihre Gärtnerei\n\nEuer letztes Telefonat war am 11. Oktober.', card: { type: 'network', sel: 'mama', title: 'Kontakt: Mama', sub: 'Familie · Geburtstag 30.10.' } } ] },
+  { id: 'c4', ws: 'privat', group: 'Letzte Woche', title: 'Was weißt du über mich?', panel: { type: 'profile' }, messages: [
+    { role: 'user', text: 'Was weißt du eigentlich über mich?' },
+    { role: 'agent', text: 'Einiges, und alles davon kannst du ändern oder löschen. Zu jedem Punkt siehst du, woher ich ihn habe. Drei neue Punkte warten auf deine Bestätigung.', card: { type: 'profile', title: 'Über mich', sub: '142 Fakten · 3 neu gelernt' } } ] },
+  { id: 'w1', ws: 'arbeit', group: 'Heute', title: 'Q4-Roadmap', panel: { type: 'tasks' }, messages: [
+    { role: 'user', text: 'Fass mir die Slack-Diskussion zur Q4-Roadmap zusammen.' },
+    { role: 'agent', text: 'Seit Montag 34 Nachrichten in #produkt. Die Kernpunkte:\n\n1. Anna will den Entwurf bis Donnerstag\n2. Tobias priorisiert die Plattform-Migration\n3. Lea braucht Feedback zum Onboarding-Flow\n\nDie Roadmap steht ganz oben auf deiner Liste.', card: { type: 'tasks', title: 'Aufgaben Arbeit', sub: '4 offen · 1 neu erkannt' } } ] },
+  { id: 'w2', ws: 'arbeit', group: 'Gestern', title: 'Update fürs Team', messages: [
+    { role: 'user', text: 'Poste ein kurzes Update in #produkt.' },
+    { role: 'agent', text: 'Entwurf ist fertig.', appr: { system: 'Slack', to: '#produkt', body: 'Kurzes Update: Der Onboarding-Flow ist im Review, Feedback bitte bis Mittwoch.' } } ] }
+];
+
+var OPEN = [
+  { id: 'o1', ws: 'privat', kind: 'Freigabe', text: 'E-Mail an Herrn Adler zur Nebenkostenabrechnung senden', appr: 'c1-3', chat: 'c1', btns: [['Freigeben', 'appr', 'E-Mail an Herrn Adler gesendet'], ['Ansehen', 'chat']] },
+  { id: 'o2', ws: 'privat', kind: 'Frage', text: 'Praxis Dr. Lang bietet Mi, 21.10., 08:30 an. Soll ich zusagen?', btns: [['Zusagen', 'res', 'Zahnarzttermin zugesagt'], ['Anderer Termin', 'res', 'Ich frage nach einem anderen Termin']] },
+  { id: 'o3', ws: 'privat', kind: 'Hinweis', text: 'Firma Meier antwortet seit fünf Tagen nicht. Soll ich nachhaken?', btns: [['Nachhaken', 'res', 'Nachfrage an Firma Meier als Entwurf erstellt'], ['Ignorieren', 'res', 'Hinweis ausgeblendet']] },
+  { id: 'o4', ws: 'arbeit', kind: 'Freigabe', text: 'Update in #produkt posten', appr: 'w2-1', chat: 'w2', btns: [['Freigeben', 'appr', 'Update in #produkt gepostet'], ['Ansehen', 'chat']] },
+  { id: 'o5', ws: 'arbeit', kind: 'Frage', text: 'Mittwoch 09 bis 11 Uhr Fokuszeit für die Roadmap blocken?', btns: [['Blocken', 'res', 'Fokuszeit eingetragen'], ['Nein', 'res', 'Kein Block gesetzt']] }
+];
+var KIND = { Freigabe: '#B45309', Frage: '#2563A8', Hinweis: '#0F766E' };
+
+var TASKS = [
+  { id: 'n1', ws: 'privat', st: 'new', title: 'Rückruf Versicherung wegen Wasserschaden', source: 'Gmail' },
+  { id: 'n2', ws: 'privat', st: 'new', title: 'Kuchen für das Kita-Fest backen', source: 'WhatsApp' },
+  { id: 'x0', ws: 'privat', st: 'todo', when: 'heute', title: 'Mama zurückrufen', due: 'Heute', source: 'Chat' },
+  { id: 't2', ws: 'privat', st: 'todo', when: 'heute', title: 'Zahnarzttermin bestätigen', due: 'Heute', source: 'Gmail' },
+  { id: 't1', ws: 'privat', st: 'todo', when: 'heute', title: 'Krimi-Dinner buchen', due: 'Heute', source: 'Chat' },
+  { id: 't4', ws: 'privat', st: 'todo', when: 'woche', title: 'Winterreifen-Termin buchen', due: 'Do', source: 'Kalender' },
+  { id: 't5', ws: 'privat', st: 'todo', when: 'woche', title: 'Fragen für Elternabend notieren', due: 'Fr', source: 'Chat' },
+  { id: 'p1', ws: 'privat', st: 'progress', when: 'heute', title: 'Einkauf Wochenmarkt', due: 'Heute · 5 von 9', source: 'WhatsApp' },
+  { id: 'p2', ws: 'privat', st: 'progress', when: 'woche', title: 'Handwerkerangebote vergleichen', due: 'Mi · 2 von 3', source: 'Gmail' },
+  { id: 'b1', ws: 'privat', st: 'blocked', when: 'woche', title: 'Herbstferien-Unterkunft buchen', due: 'wartet auf Sophie', source: 'Chat' },
+  { id: 'b2', ws: 'privat', st: 'blocked', when: 'später', title: 'Nebenkostenabrechnung prüfen', due: 'wartet auf Herrn Adler', source: 'Gmail' },
+  { id: 'n3', ws: 'arbeit', st: 'new', title: 'Feedback zum Onboarding-Flow an Lea', source: 'Slack' },
+  { id: 'a1', ws: 'arbeit', st: 'todo', when: 'heute', title: 'Q4-Roadmap Entwurf erstellen', due: 'Heute', source: 'Slack' },
+  { id: 'a2', ws: 'arbeit', st: 'todo', when: 'heute', title: 'Jour-fixe-Agenda vorbereiten', due: 'Heute, 10:00', source: 'Kalender' },
+  { id: 'a3', ws: 'arbeit', st: 'progress', when: 'woche', title: 'Onboarding-Unterlagen zusammenstellen', due: 'Mi · 3 von 5', source: 'Chat' },
+  { id: 'a4', ws: 'arbeit', st: 'blocked', when: 'woche', title: 'Vertrag unterschreiben', due: 'wartet auf HR', source: 'Gmail' }
+];
+var ST = [ { id: 'todo', label: 'Offen', color: '#64748B' }, { id: 'progress', label: 'In Arbeit', color: '#2563A8' }, { id: 'blocked', label: 'Wartet auf', color: '#B45309' } ];
+
+var FLOWS = [
+  { id: 'f1', name: 'Morgenbriefing', kind: 'Standard-Flow', trigger: 'werktags um 07:00', on: true, text: 'Fass mir jeden Werktag um 07:00 Termine, fällige Aufgaben und wichtige E-Mails zusammen. Höchstens zehn Zeilen, als Push-Nachricht.', steps: [['Termine lesen', 'Kalender'], ['Fällige Aufgaben holen', 'Aufgaben'], ['Wichtige E-Mails finden', 'Gmail'], ['Briefing schreiben und senden', 'Push']], writes: 'nichts', last: 'Heute, 07:00' },
+  { id: 'f2', name: 'Posteingang-Triage', kind: 'Standard-Flow', trigger: 'bei neuer E-Mail', on: true, text: 'Lies neue E-Mails, erkenne Aufgaben und Fristen und lege sie als „neu erkannt“ in meine Aufgaben.', steps: [['Neue E-Mail lesen', 'Gmail'], ['Aufgaben erkennen', 'Agent-J'], ['Als neu erkannt ablegen', 'Aufgaben']], writes: 'nichts', last: 'vor 12 Minuten' },
+  { id: 'f3', name: 'Rechnungen', kind: 'Eigener Flow', trigger: 'bei Rechnung im Posteingang', on: true, text: 'Leg Rechnungen im Ordner Finanzen ab und merke die Zahlung im Budget vor. Niemals selbst überweisen.', steps: [['Rechnung erkennen', 'Gmail'], ['PDF ablegen', 'Drive'], ['Zahlung vormerken', 'Budget']], writes: 'Drive, Budget (mit Freigabe)', last: 'Gestern' },
+  { id: 'f4', name: 'Geburtstage', kind: 'Standard-Flow', trigger: 'täglich um 08:00', on: false, text: 'Sag mir eine Woche vorher, wer Geburtstag hat, und schlag eine kurze Nachricht vor.', steps: [['Geburtstage prüfen', 'Kontakte'], ['Nachricht vorschlagen', 'Chat']], writes: 'nichts', last: 'pausiert' }
+];
+var HUB = [ { id: 'h1', name: 'Wochenrückblick', sub: 'sonntags · 4.050 Übernahmen' }, { id: 'h2', name: 'Abo-Wächter', sub: 'quartalsweise · 2.870 Übernahmen' }, { id: 'h3', name: 'Meeting-Vorbereitung', sub: 'vor Terminen · 3.410 Übernahmen' } ];
+
+var GC = { me: '#0F2340', Familie: '#C2410C', Arbeit: '#2563A8', Freunde: '#0F766E', Dienstleister: '#A16207' };
+var P = [
+  { id: 'me', name: 'Du', g: 'me', x: 210, y: 145, role: 'Martin', last: 'jetzt', task: 'nichts', src: 'Profil', note: 'Zentrum deines Netzwerks.' },
+  { id: 'sophie', name: 'Sophie', g: 'Familie', x: 130, y: 95, role: 'Partnerin', last: 'Heute, WhatsApp', task: 'Herbstferien planen', src: 'du, bestätigt', note: 'Plant die Herbstferien mit dir. Mag italienische Küche.' },
+  { id: 'emma', name: 'Emma', g: 'Familie', x: 78, y: 52, role: 'Tochter', last: 'Heute', task: 'Elternabend am Freitag', src: 'du, bestätigt', note: 'Schwimmkurs samstags.' },
+  { id: 'mama', name: 'Mama', g: 'Familie', x: 52, y: 145, role: 'Mutter', last: 'So, 11.10., Telefon', task: 'Krimi-Dinner buchen', src: 'Chat, Kalender', note: 'Geburtstag am 30.10. Gärtnert gerne, liest Krimis, mag keine Überraschungspartys.' },
+  { id: 'jonas', name: 'Jonas', g: 'Familie', x: 160, y: 32, role: 'Bruder', last: 'vor 2 Wochen', task: 'nichts', src: 'WhatsApp', note: 'Wohnt in Leipzig.' },
+  { id: 'anna', name: 'Anna Weber', g: 'Arbeit', x: 300, y: 88, role: 'Teamlead Produkt', last: 'Gestern, Slack', task: 'Roadmap bis Donnerstag', src: 'Slack', note: 'Jour fixe montags um 10:00.' },
+  { id: 'tobias', name: 'Tobias', g: 'Arbeit', x: 365, y: 42, role: 'CTO', last: 'Mo, Meeting', task: 'nichts', src: 'Kalender', note: 'Priorisiert die Plattform-Migration.' },
+  { id: 'lea', name: 'Lea', g: 'Arbeit', x: 378, y: 130, role: 'Product Designerin', last: 'Gestern, Slack', task: 'Feedback Onboarding-Flow', src: 'Slack', note: 'Arbeitet mit dir am Onboarding.' },
+  { id: 'max', name: 'Max', g: 'Freunde', x: 118, y: 218, role: 'Freund', last: 'Mi, Laufen', task: 'nichts', src: 'WhatsApp', note: 'Laufpartner am Mittwoch.' },
+  { id: 'julia', name: 'Julia', g: 'Freunde', x: 48, y: 236, role: 'Freundin', last: 'vor 10 Tagen', task: 'nichts', src: 'WhatsApp', note: 'Hat gute Rezepttipps.' },
+  { id: 'hofmann', name: 'Dr. Hofmann', g: 'Dienstleister', x: 262, y: 222, role: 'Steuerberater', last: 'Fr, Call', task: 'Steuerunterlagen bis Ende Oktober', src: 'Gmail, abgeleitet', note: 'Kontakt meist per E-Mail.' },
+  { id: 'adler', name: 'Herr Adler', g: 'Dienstleister', x: 200, y: 250, role: 'Vermieter', last: 'Mo, E-Mail', task: 'Nebenkostenabrechnung', src: 'Gmail', note: 'Mail zur Abrechnung wartet auf deine Freigabe.' },
+  { id: 'meier', name: 'Firma Meier', g: 'Dienstleister', x: 340, y: 235, role: 'Handwerk', last: 'vor 5 Tagen', task: 'Angebot Bad fehlt', src: 'Gmail', note: 'Antwortet seit fünf Tagen nicht.' }
+];
+var E = [['me','sophie'],['me','mama'],['me','emma'],['me','anna'],['me','tobias'],['me','max'],['me','hofmann'],['me','adler'],['sophie','emma'],['emma','mama'],['jonas','mama'],['jonas','emma'],['anna','tobias'],['anna','lea'],['tobias','lea'],['max','julia'],['sophie','max'],['hofmann','adler'],['adler','meier'],['hofmann','meier']];
+
+function reply(t) {
+  var low = t.toLowerCase();
+  if (/schick|mail|schreib|poste|sende/.test(low)) return { steps: ['Empfänger in Kontakte gefunden', 'Entwurf geschrieben'], msg: { role: 'agent', text: 'Hier ist mein Entwurf. Ich sende erst, wenn du freigibst.', appr: { system: 'Gmail', to: '[EMPFÄNGER]', body: t } } };
+  if (/verschieb/.test(low)) return { steps: ['Aufgaben geprüft', 'Kalender für Donnerstag geprüft · 1 Termin'], msg: { role: 'agent', text: 'Erledigt. „Krimi-Dinner buchen“ steht jetzt am Donnerstag. Heute bleiben dir damit zwei Aufgaben.' } };
+  if (/jeden|flow|regelmäßig|immer wenn/.test(low)) return { steps: ['Beschreibung verstanden', 'Ablauf zusammengestellt · 3 Schritte'], msg: { role: 'agent', text: 'Daraus mache ich einen Flow. Schau ihn dir rechts an, du kannst ihn sofort aktivieren.', card: { type: 'flows', title: 'Flows', sub: 'neuer Entwurf' } } };
+  if (/über mich|weißt du|profil/.test(low)) return { steps: ['Wissen geladen · 142 Fakten'], msg: { role: 'agent', text: 'Hier ist, was ich über dich weiß, jeweils mit Quelle.', card: { type: 'profile', title: 'Über mich', sub: '142 Fakten' } } };
+  if (/kontakt|netzwerk|mama|sophie|anna|wer ist/.test(low)) return { steps: ['Kontakte durchsucht · 12 Personen'], msg: { role: 'agent', text: 'Ich habe dir dein Netzwerk geöffnet.', card: { type: 'network', sel: 'mama', title: 'Netzwerk', sub: '12 Personen' } } };
+  if (/aufgabe|heute|woche|todo|steht an/.test(low)) return { steps: ['Kalender gelesen · 2 Termine', 'Aufgaben geprüft · 9 offen'], msg: { role: 'agent', text: 'Hier sind deine Aufgaben.', card: { type: 'tasks', title: 'Aufgaben', sub: 'nach Zeitraum gefiltert' } } };
+  return { steps: ['Nachricht verstanden'], msg: { role: 'agent', text: 'Verstanden. Ich kümmere mich darum und melde mich unter „Requests“, falls ich etwas von dir brauche.' } };
+}
+var VOICE = 'Verschieb das Krimi-Dinner auf Donnerstag.';
+
+class Component extends DCLogic {
+  componentDidUpdate(pp, ps) {
+    var st = this.state || {};
+    if (this.scrollEl && ps && (ps.extra !== st.extra || ps.active !== st.active || ps.working !== st.working)) this.scrollEl.scrollTop = this.scrollEl.scrollHeight;
+  }
+  componentWillUnmount() { clearTimeout(this._tt); clearInterval(this._wi); }
+  armToast() { var self = this; clearTimeout(this._tt); this._tt = setTimeout(function () { self.setState({ toast: null }); }, 8000); }
+  runWork(chatId, r) {
+    var self = this, i = 1, n = r.steps.length;
+    clearInterval(this._wi);
+    this._wi = setInterval(function () {
+      i++;
+      if (i <= n) { self.setState({ working: { chat: chatId, steps: r.steps, shown: i } }); return; }
+      clearInterval(self._wi);
+      var st = self.state || {};
+      var ex = Object.assign({}, st.extra); ex[chatId] = (ex[chatId] || []).concat([r.msg]);
+      var upd = { extra: ex, working: null };
+      if (r.msg.card) upd.panel = { type: r.msg.card.type, sel: r.msg.card.sel };
+      self.setState(upd);
+    }, 750);
+  }
+  renderVals() {
+    var self = this;
+    var start = START[this.props.startChat] || 'c0';
+    var s = Object.assign({ ws: 'privat', side: 'chats', active: start, panel: undefined, draft: '', extra: {}, custom: [], n: 0, appr: {}, apprEdit: {}, apprBody: {}, done: { x0: true }, acc: {}, gone: {}, tf: 'heute', flowOn: {}, adopted: {}, learned: {}, resolved: {}, cta: {}, voice: false, menu: false, toast: null, working: null }, this.state || {});
+    var all = s.custom.concat(CHATS);
+    var inWs = all.filter(function (c) { return c.ws === s.ws; });
+    var cur = all.find(function (c) { return c.id === s.active && c.ws === s.ws; }) || inWs[0];
+    var panel = s.panel === undefined ? (cur.panel || null) : s.panel;
+    var extra = s.extra[cur.id] || [];
+
+    function act(patch, text) {
+      var prev = {}; Object.keys(patch).forEach(function (k) { prev[k] = s[k]; });
+      self.setState(Object.assign({}, patch, { toast: { text: text, prev: prev } }));
+      self.armToast();
+    }
+    function mapPatch(k, id, v) { var o = Object.assign({}, s[k]); o[id] = v; var p = {}; p[k] = o; return p; }
+    function setMap(k, id, v) { self.setState(mapPatch(k, id, v)); }
+    function setMapAct(k, id, v, text) { act(mapPatch(k, id, v), text); }
+    function openChat(id) { var c = all.find(function (x) { return x.id === id; }); self.setState({ active: id, panel: c && c.panel ? c.panel : null, side: 'chats' }); }
+
+    var messages = cur.messages.concat(extra).map(function (m, i) {
+      var id = cur.id + '-' + i;
+      var a = s.appr[id];
+      var card = m.card;
+      var isOpen = card && panel && panel.type === card.type;
+      var editing = !!s.apprEdit[id];
+      var brief = m.brief;
+      var ctaDone = !!brief && !!brief.ctaTask && !!s.done[brief.ctaTask];
+      return {
+        isUser: m.role === 'user', isAgent: m.role === 'agent', text: m.text,
+        hasBrief: !!brief, brief: brief ? { title: brief.title, sub: brief.sub, cta: brief.cta || '', rows: brief.rows.map(function (r) { return { label: r[0], value: r[1] }; }) } : { rows: [] },
+        ctaOpen: !!brief && !!brief.cta && !ctaDone, ctaDone: ctaDone,
+        doCta: function () { setMapAct('done', brief.ctaTask, true, 'Zahnarzttermin als erledigt markiert'); },
+        hasCard: !!card, card: card || {}, cTasks: !!card && card.type === 'tasks', cFlows: !!card && card.type === 'flows', cNetwork: !!card && card.type === 'network', cProfile: !!card && card.type === 'profile',
+        cardBorder: isOpen ? '#2563A8' : '#E0E6EE', cardCta: isOpen ? 'Geöffnet' : 'Öffnen',
+        open: function () { self.setState({ panel: { type: card.type, sel: card.sel } }); },
+        hasAppr: !!m.appr, appr: m.appr || {}, aPending: !!m.appr && !a,
+        apprText: s.apprBody[id] !== undefined ? s.apprBody[id] : (m.appr ? m.appr.body : ''),
+        editing: editing, notEditing: !editing, editLabel: editing ? 'Fertig' : 'Ändern',
+        toggleEdit: function () { setMap('apprEdit', id, !editing); },
+        onEdit: function (e) { setMap('apprBody', id, e.target.value); },
+        apprHead: !a ? 'Freigabe nötig' : (a === 'ok' ? 'Freigegeben und gesendet' : 'Abgelehnt, nichts gesendet'),
+        apprHeadBg: !a ? '#FDF3E4' : (a === 'ok' ? '#E7F5EC' : '#F1F3F6'), apprHeadFg: !a ? '#7A4106' : (a === 'ok' ? '#166534' : '#5A6B80'),
+        apprBorder: !a ? '#F1D3A6' : '#E3E8EF',
+        approve: function () { var p = mapPatch('appr', id, 'ok'); p.apprEdit = Object.assign({}, s.apprEdit); p.apprEdit[id] = false; act(p, 'Freigegeben und gesendet'); },
+        reject: function () { setMapAct('appr', id, 'no', 'Abgelehnt, nichts gesendet'); }
+      };
+    });
+
+    var groups = ['Heute', 'Gestern', 'Letzte Woche'].map(function (g) {
+      return { label: g, items: inWs.filter(function (c) { return c.group === g; }).map(function (c) {
+        var on = c.id === cur.id;
+        var title = c.title;
+        if (c.isNew) { var f = (s.extra[c.id] || []).find(function (m) { return m.role === 'user'; }); if (f) title = f.text; }
+        return { title: title, bg: on ? '#E4EBF4' : 'transparent', fw: on ? '600' : '400', pick: function () { openChat(c.id); } };
+      }) };
+    }).filter(function (g) { return g.items.length; });
+
+    var openList = OPEN.filter(function (o) { return o.ws === s.ws && !s.resolved[o.id] && !(o.appr && s.appr[o.appr]); });
+    var openItems = openList.map(function (o) {
+      return { kind: o.kind, text: o.text, color: KIND[o.kind], btns: o.btns.map(function (b, i) {
+        var primary = i === 0;
+        return { label: b[0], bg: primary ? '#2563A8' : '#FFFFFF', fg: primary ? '#FFFFFF' : '#33445A', border: primary ? '0' : '1px solid #D8E0EA',
+          run: function () {
+            if (b[1] === 'chat') return openChat(o.chat);
+            if (b[1] === 'appr') return setMapAct('appr', o.appr, 'ok', b[2]);
+            setMapAct('resolved', o.id, b[0], b[2]);
+          } };
+      }) };
+    });
+
+    function sendText(t, voice) {
+      if (s.working) return;
+      var r = reply(t);
+      var ex = Object.assign({}, s.extra); ex[cur.id] = extra.concat([{ role: 'user', text: t }]);
+      self.setState({ draft: '', voice: false, extra: ex, working: { chat: cur.id, steps: r.steps, shown: 1 } });
+      self.runWork(cur.id, r);
+    }
+    function send() { var t = (s.draft || '').trim(); if (t) sendText(t); }
+
+    var wsBtns = ['privat', 'arbeit'].map(function (k) { var on = s.ws === k; return { label: WS[k], on: on, bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#0F2340' : '#5A6B80', shadow: on ? '0 1px 2px rgba(15,35,64,.14)' : 'none', pick: function () { self.setState({ ws: k, active: null, panel: undefined }); } }; });
+
+    var mine = TASKS.filter(function (t) { return t.ws === s.ws && !s.gone[t.id]; }).map(function (t) { return Object.assign({}, t, { st: t.st === 'new' && s.acc[t.id] ? 'todo' : t.st, when: t.when || 'woche', due: t.due || 'neu' }); });
+    var newTasks = mine.filter(function (t) { return t.st === 'new'; }).map(function (t) { return { title: t.title, source: t.source, accept: function () { setMapAct('acc', t.id, true, 'Aufgabe übernommen'); }, discard: function () { setMapAct('gone', t.id, true, 'Aufgabe verworfen'); } }; });
+    function inRange(t) { return s.tf === 'alle' || (s.tf === 'heute' ? t.when === 'heute' : t.when !== 'später'); }
+    var taskGroups = ST.map(function (g) {
+      var items = mine.filter(function (t) { return t.st === g.id && inRange(t); }).map(function (t) {
+        var d = !!s.done[t.id];
+        return { title: t.title, meta: t.due + ' · aus ' + t.source, metaColor: t.due.indexOf('Heute') === 0 && !d ? '#B42318' : '#5A6B80', checked: d, ring: d ? '#15803D' : '#8796A8', fill: d ? '#15803D' : 'transparent', mark: d ? '✓' : '', strike: d ? 'line-through' : 'none', titleColor: d ? '#5A6B80' : '#0E1B2C',
+          toggle: function () { setMapAct('done', t.id, !d, d ? 'Wieder offen' : 'Erledigt: ' + t.title); } };
+      });
+      return { label: g.label, color: g.color, count: items.length, items: items };
+    }).filter(function (g) { return g.items.length; });
+    var todays = mine.filter(function (t) { return t.when === 'heute' && t.st !== 'new'; });
+    var tDone = todays.filter(function (t) { return s.done[t.id]; }).length;
+    var tLeft = todays.length - tDone;
+    var allDone = todays.length > 0 && tLeft === 0;
+    var taskFilters = [['heute', 'Heute'], ['woche', 'Diese Woche'], ['alle', 'Alle']].map(function (f) { var on = s.tf === f[0]; return { label: f[1], on: on, bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#0F2340' : '#5A6B80', shadow: on ? '0 1px 2px rgba(15,35,64,.12)' : 'none', pick: function () { self.setState({ tf: f[0] }); } }; });
+
+    function fon(f) { return s.flowOn[f.id] === undefined ? f.on : s.flowOn[f.id]; }
+    function sw(f) { var on = fon(f); return { checked: on, track: on ? '#2563A8' : '#A3B1C2', knob: on ? '21px' : '3px', toggle: function () { setMapAct('flowOn', f.id, !on, f.name + (on ? ' pausiert' : ' aktiviert')); } }; }
+    var curFlow = panel && panel.type === 'flows' ? panel.sel : null;
+    var flows = FLOWS.map(function (f) { return Object.assign({ name: f.name, trigger: f.trigger + (fon(f) ? '' : ' · pausiert'), dot: fon(f) ? '#15803D' : '#A3B1C2', sideBg: curFlow === f.id ? '#E4EBF4' : 'transparent', pick: function () { self.setState({ panel: { type: 'flows', sel: f.id } }); } }, sw(f)); });
+    var hub = HUB.map(function (h) { var a = !!s.adopted[h.id]; return { name: h.name, sub: h.sub, label: a ? '✓ Übernommen' : 'Übernehmen', bg: a ? '#E7F5EC' : '#FFFFFF', fg: a ? '#166534' : '#0F2340', border: a ? '1px solid #BFE3CB' : '1px solid #D8E0EA', adopt: function () { if (!a) setMapAct('adopted', h.id, true, h.name + ' übernommen'); } }; });
+    var fsel = curFlow ? FLOWS.find(function (f) { return f.id === curFlow; }) : null;
+    var fd = fsel ? Object.assign({ name: fsel.name, kind: fsel.kind, trigger: fsel.trigger, text: fsel.text, writes: fsel.writes, last: fsel.last, steps: fsel.steps.map(function (x, i) { return { n: i + 1, label: x[0], sys: x[1] }; }) }, sw(fsel)) : { steps: [] };
+
+    var selP = panel && panel.type === 'network' ? (panel.sel || 'mama') : 'mama';
+    var byId = {}; P.forEach(function (p) { byId[p.id] = p; });
+    var nbr = {}; E.forEach(function (e) { if (e[0] === selP) nbr[e[1]] = 1; if (e[1] === selP) nbr[e[0]] = 1; });
+    var edges = E.map(function (e) {
+      var a = byId[e[0]], b = byId[e[1]], dx = b.x - a.x, dy = b.y - a.y, hot = e[0] === selP || e[1] === selP, o = e[0] === selP ? b : a;
+      return { left: a.x + 'px', top: a.y + 'px', width: Math.sqrt(dx * dx + dy * dy) + 'px', rot: 'rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI) + 'deg)', h: hot ? '2px' : '1px', color: hot ? GC[o.g] : 'rgba(90,107,128,.25)' };
+    });
+    var nodes = P.map(function (p) {
+      var r = p.g === 'me' ? 11 : 8, on = p.id === selP, c = GC[p.g];
+      return { name: p.name, on: on, left: (p.x - r) + 'px', top: (p.y - r) + 'px', size: 2 * r + 'px', color: c,
+        glow: on ? '0 0 0 3px #FFFFFF, 0 0 0 5px ' + c : '0 0 0 2px #FFFFFF',
+        opacity: on || nbr[p.id] || p.g === 'me' ? '1' : '0.55', labelLeft: (p.x - 50) + 'px', labelTop: (p.y + r + 3) + 'px', labelColor: on ? '#0E1B2C' : '#33445A', fw: on ? '600' : '400',
+        pick: function () { self.setState({ panel: { type: 'network', sel: p.id } }); } };
+    });
+    var cp = byId[selP];
+    var person = { name: cp.name, role: cp.role + (cp.g !== 'me' ? ' · ' + cp.g : ''), last: cp.last, task: cp.task, note: cp.note, src: cp.src, color: GC[cp.g], initial: cp.g === 'me' ? 'MS' : cp.name.replace(/^(Dr\.|Herr|Firma)\s+/, '')[0] };
+
+    var learned = [['l1', 'Du bevorzugst Termine am Vormittag.', 'aus Chat „Wochenplanung“, gestern'], ['l2', 'Dr. Hofmann ist dein Steuerberater.', 'aus Gmail, Fr, 16.10.'], ['l3', 'Im Workspace Arbeit willst du keine privaten Termine sehen.', 'aus Chat „Update fürs Team“, gestern']].filter(function (l) { return !s.learned[l[0]]; }).map(function (l) {
+      return { text: l[1], src: l[2], ok: function () { setMapAct('learned', l[0], 'ok', 'Gespeichert: ' + l[1]); }, no: function () { setMapAct('learned', l[0], 'no', 'Verworfen'); } };
+    });
+    function fact(label, value, src, kind) { var c = kind === 'bestätigt'; return { label: label, value: value, src: src, kind: kind, bg: c ? '#E7F5EC' : '#FDF3E4', fg: c ? '#166534' : '#7A4106' }; }
+
+    var PT = { tasks: ['Aufgaben', 'Datentopf Aufgaben · ' + WS[s.ws]], flows: ['Flows', 'Automatisierungen in einfacher Sprache'], network: ['Netzwerk', 'Datentopf Kontakte'], profile: ['Über mich', 'Datentopf Wissen'] };
+    var pt = panel ? PT[panel.type] : ['', ''];
+    var w = s.working && s.working.chat === cur.id ? s.working : null;
+
+    return {
+      isChats: s.side === 'chats', isOpen: s.side === 'open', isFlows: s.side === 'flows',
+      chatsCurrent: s.side === 'chats' ? 'page' : 'false', openCurrent: s.side === 'open' ? 'page' : 'false', flowsCurrent: s.side === 'flows' ? 'page' : 'false',
+      navChatsBg: s.side === 'chats' ? '#E4EBF4' : 'transparent', navOpenBg: s.side === 'open' ? '#E4EBF4' : 'transparent', navFlowsBg: s.side === 'flows' ? '#E4EBF4' : 'transparent',
+      showChats: function () { self.setState({ side: 'chats' }); }, showOpen: function () { self.setState({ side: 'open' }); },
+      showFlows: function () { self.setState({ side: 'flows', panel: { type: 'flows' } }); },
+      activeFlows: FLOWS.filter(function (f) { return fon(f); }).length,
+      menuOpen: !!s.menu, menuBg: s.menu ? '#E4EBF4' : 'transparent', toggleMenu: function () { self.setState({ menu: !s.menu }); },
+      menuItems: ['Konto', 'Workspaces', 'Verbundene Accounts', 'Sprache und Benachrichtigungen', 'Abrechnung'],
+      openCount: openList.length, hasOpen: openList.length > 0, openItems: openItems, noOpen: openList.length === 0,
+      groups: groups, wsBtns: wsBtns, wsLabel: 'Workspace ' + WS[s.ws],
+      activeTitle: cur.isNew && extra.length ? extra[0].text : cur.title, messages: messages,
+      isWorking: !!w, workSteps: w ? w.steps.slice(0, w.shown).map(function (t, i) { var last = i === w.shown - 1; return { text: t, done: !last, busy: last }; }) : [],
+      working: !!s.working, sendOpacity: s.working ? '0.45' : '1',
+      hasToast: !!s.toast, toastText: s.toast ? s.toast.text : '',
+      undo: function () { if (!s.toast) return; clearTimeout(self._tt); self.setState(Object.assign({}, s.toast.prev, { toast: null })); },
+      panelBtnBg: panel ? '#E4EBF4' : 'transparent',
+      togglePanel: function () { self.setState({ panel: panel ? null : (cur.panel || { type: 'tasks' }) }); },
+      panelOpen: !!panel, pTitle: fsel ? fsel.name : pt[0], pSub: fsel ? 'Flow' : pt[1], pBack: !!fsel,
+      closePanel: function () { self.setState({ panel: null }); }, flowBack: function () { self.setState({ panel: { type: 'flows' } }); },
+      pTasks: !!panel && panel.type === 'tasks', pFlowList: !!panel && panel.type === 'flows' && !fsel, pFlowDetail: !!fsel, pNetwork: !!panel && panel.type === 'network', pProfile: !!panel && panel.type === 'profile',
+      taskFilters: taskFilters, newTasks: newTasks, hasNew: newTasks.length > 0, taskGroups: taskGroups,
+      todayDone: tDone, todayTotal: todays.length, todayPct: todays.length ? Math.round(tDone / todays.length * 100) + '%' : '0%',
+      todayBg: allDone ? '#E7F5EC' : '#F4F7FB',
+      todayMsg: allDone ? 'Alles für heute erledigt. Stark, Martin!' : (tLeft === 1 ? 'Noch 1 Aufgabe für heute.' : 'Noch ' + tLeft + ' Aufgaben für heute.'),
+      flows: flows, hub: hub, fd: fd,
+      edges: edges, nodes: nodes, person: person,
+      legend: [['Familie', GC.Familie], ['Arbeit', GC.Arbeit], ['Freunde', GC.Freunde], ['Dienstleister', GC.Dienstleister]].map(function (l) { return { label: l[0], color: l[1] }; }),
+      learned: learned, hasLearned: learned.length > 0,
+      facts: [ fact('Rolle', 'Product Leader', 'von dir im Chat', 'bestätigt'), fact('Wohnort', 'Nürnberg', 'von dir im Chat', 'bestätigt'), fact('Sprachen', 'Deutsch, Englisch', 'aus Gmail', 'abgeleitet'), fact('Arbeitszeit', 'Mo bis Fr, 08:30 bis 18:00', 'aus Kalender', 'abgeleitet'), fact('Sport', 'Laufen, dreimal pro Woche', 'von dir im Chat', 'bestätigt') ],
+      roles: [{ label: 'Vater', bg: '#DFF2EF' }, { label: 'Partner', bg: '#DFF2EF' }, { label: 'Läufer', bg: '#DFF2EF' }, { label: 'Product Lead', bg: '#E3EEF9' }],
+      prefs: ['Du', 'Direkt', 'Kurz', 'Wichtigstes zuerst', 'Keine Gedankenstriche'],
+      draft: s.draft, onDraft: function (e) { self.setState({ draft: e.target.value }); },
+      onKey: function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }, send: send,
+      notVoice: !s.voice, isVoice: s.voice, voiceText: VOICE,
+      voiceLabel: s.voice ? 'Fertig' : 'Sprechen', voiceBg: s.voice ? '#2563A8' : '#EEF2F7', voiceFg: s.voice ? '#FFFFFF' : '#0F2340',
+      voiceToggle: function () { if (s.voice) sendText(VOICE, true); else self.setState({ voice: true }); },
+      scrollRef: function (el) { self.scrollEl = el; },
+      newChat: function () {
+        var id = 'n' + (s.n + 1);
+        var c = { id: id, isNew: true, ws: s.ws, group: 'Heute', title: 'Neuer Chat', messages: [ { role: 'agent', text: 'Hallo Martin, womit kann ich helfen? Schreib oder sprich einfach los.' } ] };
+        self.setState({ custom: [c].concat(s.custom), active: id, n: s.n + 1, panel: null, side: 'chats', draft: '' });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
